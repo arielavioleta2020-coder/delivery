@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Carrito - DELIVERI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .carrito-content {
+            padding: 30px;
+        }
+        
+        .item-carrito {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .item-carrito:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .item-header h3 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin: 0;
+        }
+        
+        .item-price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #e53e3e;
+        }
+        
+        .item-details {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .cantidad-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cantidad-form input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1em;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #38a169;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+        
+        .btn-success:hover {
+            background: #2f855a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #a0aec0;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #718096;
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #fed7d7 0%, #feebc8 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .total-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #dd6b20;
+            margin: 10px 0;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .empty-cart h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+        
+        .restaurant-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Tu Carrito de Compras</h1>
+            <p>Revisa y gestiona tus productos antes de confirmar</p>
+        </div>
+        
+        <div class="carrito-content">
+            {% if items %}
+                {% for item in items %}
+                <div class="item-carrito">
+                    <div class="item-header">
+                        <h3>🍽️ {{ item.producto.nombre }}</h3>
+                        <div class="item-price">${{ item.precio_unitario }}</div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div>
+                            <p><strong>Restaurante:</strong> {{ item.producto.restaurante.nombre }}</p>
+                            <p><strong>Descripción:</strong> {{ item.producto.descripcion }}</p>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <form method="post" action="{% url 'pedidos:actualizar_cantidad' item.id %}" class="cantidad-form">
+                                {% csrf_token %}
+                                <label for="cantidad"><strong>Cantidad:</strong></label>
+                                <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1">
+                                <button type="submit" class="btn btn-primary">🔄 Actualizar</button>
+                            </form>
+                            <p style="margin-top: 10px; font-size: 1.2em; font-weight: bold;">
+                                Subtotal: $<span style="color: #e53e3e;">{{ item.subtotal }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 15px;">
+                        <a href="{% url 'pedidos:eliminar_del_carrito' item.id %}" class="btn btn-danger">
+                            🗑️ Eliminar
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="total-section">
+                    <h2>💰 Total del Pedido</h2>
+                    <div class="total-amount">${{ total }}</div>
+                    <p>Incluye todos los productos de tu carrito</p>
+                </div>
+                
+                <div class="actions">
+                    <a href="{% url 'restaurantes:lista' %}" class="btn btn-secondary">
+                        ← Seguir Comprando
+                    </a>
+                    <a href="{% url 'pedidos:vaciar_carrito' %}" class="btn btn-danger">
+                        🗑️ Vaciar Carrito
+                    </a>
+                    <a href="{% url 'pedidos:crear_pedido' %}" class="btn btn-success">
+                        ✅ Realizar Pedido
+                    </a>
+                </div>
+            {% else %}
+                <div class="empty-cart">
+                    <div class="restaurant-icon">🍽️</div>
+                    <h2>Tu carrito está vacío</h2>
+                    <p>¡Descubre deliciosos platillos y agrégalos a tu carrito!</p>
+                    <a href="{% url 'restaurantes:lista' %}" class="btn btn-success" style="margin-top: 20px;">
+                        🏪 Explorar Restaurantes
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

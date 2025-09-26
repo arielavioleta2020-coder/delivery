@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurante.nombre }} - DELIVERI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .navbar {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .navbar-nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .navbar-nav a:hover {
+            color: #764ba2;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .restaurante-header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .restaurante-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .restaurante-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .producto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .producto-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .producto-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
+        .btn-add-cart {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-add-cart:hover {
+            background: #5a67d8;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: #5a67d8;
+        }
+
+        .carrito-badge {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">DELIVERI</div>
+        <div class="navbar-nav">
+            <a href="{% url 'restaurantes:lista' %}">← Restaurantes</a>
+            <a href="{% url 'usuarios:index' %}">Inicio</a>
+            <a href="{% url 'pedidos:ver_carrito' %}" class="carrito-link">
+                🛒 Carrito
+                {% if carrito_count > 0 %}
+                    <span class="carrito-badge">{{ carrito_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <a href="{% url 'restaurantes:lista' %}" class="back-button">← Volver a Restaurantes</a>
+        
+        <div class="restaurante-header">
+            <h1 class="restaurante-title">{{ restaurante.nombre }}</h1>
+            <p>{{ restaurante.descripcion }}</p>
+            <div class="restaurante-info">
+                <span>⭐ {{ restaurante.rating }}</span>
+                <span>⏱ {{ restaurante.tiempo_entrega }}</span>
+                <span>🚗 ${{ restaurante.costo_envio }} envío</span>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: 20px; color: #333;">Menú</h2>
+        
+        <div class="productos-grid">
+            {% for producto in productos %}
+            <div class="producto-card">
+                <h3 class="producto-name">{{ producto.nombre }}</h3>
+                <p style="color: #666; margin-bottom: 15px;">{{ producto.descripcion }}</p>
+                <div class="producto-price">${{ producto.precio }}</div>
+                <button class="btn-add-cart" onclick="agregarAlCarrito({{ producto.id }})">
+                    🛒 Añadir al Carrito
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if productos|length == 0 %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <h3>No hay productos disponibles en este momento</h3>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function agregarAlCarrito(productoId) {
+            fetch('/pedidos/carrito/agregar/' + productoId + '/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    // Actualizar contador del carrito
+                    const carritoBadge = document.querySelector('.carrito-badge');
+                    if (carritoBadge) {
+                        carritoBadge.textContent = data.carrito_count;
+                    } else {
+                        const carritoLink = document.querySelector('.carrito-link');
+                        var newBadge = document.createElement('span');
+                        newBadge.className = 'carrito-badge';
+                        newBadge.textContent = data.carrito_count;
+                        carritoLink.appendChild(newBadge);
+                    }
+                    
+                    // Mostrar mensaje de éxito
+                    alert('✅ Producto agregado al carrito');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Error al agregar producto al carrito');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurantes - DELIVERI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .navbar {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .navbar-nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .navbar-nav a:hover {
+            color: #764ba2;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .restaurantes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .restaurante-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .restaurante-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .restaurante-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f0f0f0;
+        }
+        
+        .restaurante-info {
+            padding: 20px;
+        }
+        
+        .restaurante-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .restaurante-category {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .restaurante-rating {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+        
+        .restaurante-delivery {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: #5a67d8;
+        }
+        
+        .carrito-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        
+        .carrito-link:hover {
+            background: #218838;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+        
+        .carrito-badge {
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .debug-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">DELIVERI</div>
+        <div class="navbar-nav">
+            <span>Hola, {{ user.username }}</span>
+            <a href="{% url 'usuarios:index' %}">Inicio</a>
+            
+            <a href="{% url 'pedidos:ver_carrito' %}">
+                🛒 Carrito 
+                {% if carrito_count > 0 %}
+                    <span class="carrito-badge">{{ carrito_count }}</span>
+                {% endif %}
+            </a>
+            
+            <a href="{% url 'usuarios:logout' %}">Cerrar Sesión</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header-actions">
+            <a href="{% url 'usuarios:index' %}" class="back-button">← Volver al Inicio</a>
+            
+            <a href="{% url 'pedidos:ver_carrito' %}" class="carrito-link">
+                🛒 Ver Carrito 
+                {% if carrito_count > 0 %}
+                    <span class="carrito-badge">{{ carrito_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+        
+        <h1 class="page-title">Restaurantes Disponibles</h1>
+
+<!-- DEBUG ESPECÍFICO PARA PIZZA HUT -->
+<div style="background: #ffcccc; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+    <strong>🔍 DEBUG PIZZA HUT:</strong><br>
+    {% for r in restaurantes %}
+        {% if r.nombre == "Pizza Hut" %}
+            <strong>Pizza Hut encontrado:</strong><br>
+            - Nombre: {{ r.nombre }}<br>
+            - Categoría: {{ r.categoria.nombre }}<br>
+            - ID: {{ r.id }}<br>
+            - ¿Condición cumple? {% if r.nombre == "Pizza Hut" %}✅ SÍ{% else %}❌ NO{% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
+        
+        <!-- DEBUG: Información para ver qué está pasando -->
+<div class="debug-info">
+    <strong>🔍 Información de Depuración:</strong><br>
+    Número de restaurantes: <strong>{{ restaurantes|length }}</strong><br>
+    {% for r in restaurantes %}
+        ► {{ r.nombre }} - Categoría: {{ r.categoria.nombre }}<br>  <!-- ← Aquí quité el ID -->
+    {% empty %}
+        ⚠️ No hay restaurantes en la lista<br>
+    {% endfor %}
+</div>
+        
+       <div class="restaurantes-grid">
+    {% for restaurante in restaurantes %}
+    <div class="restaurante-card" onclick="window.location.href='{% url 'restaurantes:detalle' restaurante.id %}'">
+        <!-- SOLUCIÓN DEFINITIVA - IMAGEN FIJA PARA CADA RESTAURANTE -->
+       <!-- SOLUCIÓN COMPLETA CON LOS 4 RESTAURANTES -->
+{% if restaurante.nombre == "Pizza Hut" %}
+<div class="restaurante-image" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&w=400&h=200&fit=crop');"></div>
+{% elif restaurante.nombre == "KFC" %}
+<div class="restaurante-image" style="background-image: url('https://images.unsplash.com/photo-1561758033-7e924f619b47?w=400&h=200&fit=crop');"></div>
+{% elif restaurante.nombre == "McDonalds" %}
+<div class="restaurante-image" style="background-image: url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=200&fit=crop');"></div>
+{% elif restaurante.nombre == "Sushi Express" %}
+<div class="restaurante-image" style="background-image: url('https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=200&fit=crop');"></div>
+{% else %}
+<div class="restaurante-image" style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop');"></div>
+{% endif %}
+        
+        <div class="restaurante-info">
+            <h3 class="restaurante-name">{{ restaurante.nombre }}</h3>
+            <div class="restaurante-category">{{ restaurante.categoria.nombre }}</div>
+            <div class="restaurante-rating">
+                {% with ''|center:5 as range %}
+                {% for i in range %}
+                    {% if forloop.counter <= restaurante.rating %}
+                    ★
+                    {% else %}
+                    ☆
+                    {% endif %}
+                {% endfor %}
+                {% endwith %}
+                ({{ restaurante.rating }})
+            </div>
+            <div class="restaurante-delivery">
+                <span>⏱ {{ restaurante.tiempo_entrega }}</span>
+                <span>🚗 ${{ restaurante.costo_envio }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="color: #666; margin-bottom: 10px;">🍽️ No hay restaurantes disponibles</h3>
+        <p style="color: #888;">Por favor, contacta al administrador para agregar restaurantes.</p>
+    </div>
+    {% endfor %}
+</div>
+       
+        <!-- Información adicional de ayuda -->
+        <div style="margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center;">
+            <small>¿Problemas con las imágenes? Verifica que las URLs de Unsplash estén accesibles.</small>
+        </div>
+    </div>
+
+    <script>
+        // Función para agregar producto al carrito sin salir de la página
+        function agregarAlCarrito(productoId) {
+            fetch('/pedidos/carrito/agregar/' + productoId + '/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    // Actualizar contador del carrito
+                    const carritoBadge = document.querySelector('.carrito-badge');
+                    if (carritoBadge) {
+                        carritoBadge.textContent = '(' + data.carrito_count + ')';
+                    } else {
+                        const carritoLink = document.querySelector('.carrito-link');
+                        var newBadge = document.createElement('span');
+                        newBadge.className = 'carrito-badge';
+                        newBadge.textContent = '(' + data.carrito_count + ')';
+                        carritoLink.appendChild(newBadge);
+                    }
+                    
+                    // Mostrar mensaje de éxito
+                    alert('Producto agregado al carrito');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Error al agregar producto al carrito');
+            });
+        }
+        
+        // Verificar que las imágenes se carguen correctamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const imagenes = document.querySelectorAll('.restaurante-image');
+            imagenes.forEach(function(imagen) {
+                imagen.onerror = function() {
+                    this.style.backgroundImage = "url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop')";
+                    this.style.backgroundColor = "#ddd";
+                };
+            });
+        });
+    </script>
+</body>
+</html>
